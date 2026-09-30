@@ -15,6 +15,8 @@ The project starts with two goals:
 
 ## Runtime Stack
 
+- Python 3.12 (project version tracked in `.python-version` and `pyproject.toml`)
+
 - `rich` provides rich terminal output and scan progress displays.
 - `structlog` provides structured application logging.
 - `mutagen` reads audio metadata across common tagging formats.
@@ -60,17 +62,33 @@ snapshot reading has no known total, so it shows an indeterminate progress bar.
 Run quality checks:
 
 ```bash
-just check
-just test tests/test_snapshot.py
-just format
+just test                   # Unit tests; accepts paths, e.g. just test tests/test_snapshot.py
+just lint                   # Ruff lint
+just format-check           # Verify formatting without changing files
+just typecheck              # mypy
+just check                  # Run all four checks above
 ```
 
-Individual checks are `just test`, `just lint`, `just format-check`, and
-`just typecheck`. Without `just`, use `uv sync --all-groups`, `uv run pytest`,
-`uv run ruff check .`, `uv run ruff format --check .`, and `uv run mypy`.
+`just format` changes code formatting; `just coverage` generates a separate
+coverage report. Commit messages are checked independently by the commit-msg hook
+or `just commitlint-message`. Without `just`, use `uv sync --all-groups`,
+`uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, and
+`uv run mypy`.
 
-If you decide to initialize Git later, you can enable local hooks with:
+Install both Python and npm dependencies and enable the commit-message hook:
 
 ```bash
-uv run pre-commit install
+just setup
+just install-hooks
 ```
+
+Commit subjects start with an uppercase letter. Use Conventional Commits syntax,
+for example `feat(cli): Add snapshot summary` or, for a breaking change,
+`feat(cli)!: Change snapshot format`. Test a message locally with
+`just commitlint-message 'feat(cli): Add snapshot summary'`.
+
+GitHub Actions checks new commits with commitlint, runs lint, format and type
+checks on Linux, and runs the unit tests with coverage on Linux, Windows, and
+macOS. `just coverage` runs the same coverage command locally and writes
+`coverage.xml`; CI uploads a coverage XML artifact for each platform.
+Dependabot checks `uv`, npm, and GitHub Actions dependencies weekly.

@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: extractions/setup-just@v4
+      - run: npm ci
+      - name: Check pull request commits
+        if: github.event_name == 'pull_request'
+        env:
+          FROM_SHA: ${{ github.event.pull_request.base.sha }}
+          TO_SHA: ${{ github.event.pull_request.head.sha }}
+        run: just commitlint-range "$FROM_SHA" "$TO_SHA"
+      - name: Check pushed commits
+        if: github.event_name == 'push'
+        env:
+          FROM_SHA: ${{ github.event.before }}
+          TO_SHA: ${{ github.sha }}
+        run: just commitlint-range "$FROM_SHA" "$TO_SHA"
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version-file: .python-version
+      - uses: extractions/setup-just@v4
+      - run: uv sync --all-groups --locked
+      - run: just lint
+      - run: just format-check
+      - run: just typecheck
+
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: x64
+            runner: ubuntu-latest
+          - os: linux
+            arch: arm64
+            runner: ubuntu-26.04-arm
+          - os: windows
+            arch: x64
+            runner: windows-latest
+          - os: windows
+            arch: arm64
+            runner: windows-11-arm
+          - os: macos
+            arch: x64
+            runner: macos-26-intel
+          - os: macos
+            arch: arm64
+            runner: macos-latest
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version-file: .python-version
+      - uses: extractions/setup-just@v4
+      - run: uv sync --all-groups --locked
+      - run: just coverage
+      - uses: codecov/codecov-action@v7
+        with:
+          files: coverage.xml
+          disable_search: true
+          flags: ${{ matrix.os }}-${{ matrix.arch }}
+          name: coverage-${{ matrix.os }}-${{ matrix.arch }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.arch }}
+          path: coverage.xml
+          if-no-files-found: ignore
