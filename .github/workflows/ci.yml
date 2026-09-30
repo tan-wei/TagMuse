@@ -86,8 +86,7 @@ jobs:
           disable_search: true
           flags: ${{ matrix.os }}-${{ matrix.arch }}
           name: coverage-${{ matrix.os }}-${{ matrix.arch }}
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
+          fail_ci_if_error: false
       - uses: actions/upload-artifact@v4
         if: always()
         with:

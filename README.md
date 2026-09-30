@@ -1,5 +1,8 @@
 # TagMuse
 
+[![CI](https://github.com/tan-wei/TagMuse/actions/workflows/ci.yml/badge.svg)](https://github.com/tan-wei/TagMuse/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/tan-wei/TagMuse/branch/main/graph/badge.svg)](https://codecov.io/gh/tan-wei/TagMuse)
+
 TagMuse is a local-first Python application for auditing and normalizing music tag metadata.
 
 The project starts with two goals:
