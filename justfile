@@ -56,6 +56,9 @@ commitlint-range from to:
     npm exec --no -- commitlint --from "$1" --to "$2"
 
 install-hooks:
-    uv run pre-commit install --hook-type commit-msg
+    uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+
+uninstall-hooks:
+    uv run pre-commit uninstall --hook-type pre-commit --hook-type commit-msg
 
 check: test lint format-check typecheck
