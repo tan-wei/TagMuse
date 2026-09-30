@@ -8,7 +8,7 @@ from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
-from mutagen import File  # type: ignore[attr-defined]
+from mutagen import File
 
 VERSION = 1
 HEADER = {"type": "tag-muse-snapshot", "version": VERSION}

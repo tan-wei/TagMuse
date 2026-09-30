@@ -6,7 +6,7 @@ import wave
 from pathlib import Path
 
 import pytest
-from mutagen.id3 import APIC, TIT2, TPE1  # type: ignore[attr-defined]
+from mutagen.id3 import APIC, TIT2, TPE1
 from mutagen.wave import WAVE
 
 from tag_muse.cli import main
